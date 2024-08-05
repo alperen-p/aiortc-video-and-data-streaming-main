@@ -1,0 +1,147 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebRTC Answer</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        video {
+            width: 80%;
+            max-width: 640px;
+            border: 2px solid #000;
+            border-radius: 10px;
+            background-color: #000;
+        }
+    </style>
+</head>
+<body>
+    <video id="remoteVideo" autoplay playsinline></video>
+
+    <script>
+        const signalingUrl = "ws://localhost:8765"; // WebSocket server URL
+        const pc = new RTCPeerConnection();
+
+        pc.ontrack = (event) => {
+            const video = document.getElementById("remoteVideo");
+            if (video.srcObject !== event.streams[0]) {
+                video.srcObject = event.streams[0];
+                console.log("Received remote stream");
+            }
+        };
+
+        async function start() {
+            const signaling = new WebSocket(signalingUrl);
+
+            signaling.onmessage = async (message) => {
+                const data = JSON.parse(message.data);
+                if (data.type === "offer") {
+                    await pc.setRemoteDescription(new RTCSessionDescription(data));
+                    const answer = await pc.createAnswer();
+                    await pc.setLocalDescription(answer);
+                    signaling.send(JSON.stringify(pc.localDescription));
+                }
+            };
+
+            signaling.onopen = () => {
+                console.log("WebSocket connected");
+            };
+
+            signaling.onclose = () => {
+                console.log("WebSocket disconnected");
+            };
+        }
+
+        start();
+    </script>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebRTC Answer</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        video {
+            width: 80%;
+            max-width: 640px;
+            border: 2px solid #000;
+            border-radius: 10px;
+            background-color: #000;
+        }
+    </style>
+</head>
+<body>
+    <video id="remoteVideo" autoplay playsinline></video>
+
+    <script>
+        const signalingUrl = "ws://localhost:8765"; // WebSocket server URL
+        const pc = new RTCPeerConnection();
+
+        pc.ontrack = (event) => {
+            const video = document.getElementById("remoteVideo");
+            if (video.srcObject !== event.streams[0]) {
+                video.srcObject = event.streams[0];
+                console.log("Received remote stream");
+            }
+        };
+
+        // Veri kanalı olayını yakalayalım ve mesajları konsola yazdıralım
+        pc.ondatachannel = (event) => {
+            const channel = event.channel;
+            channel.onmessage = (e) => {
+                console.log("Received message from data channel:", e.data);
+            };
+            channel.onopen = () => {
+                console.log("Data channel is open");
+            };
+            channel.onclose = () => {
+                console.log("Data channel is closed");
+            };
+        };
+
+        async function start() {
+            const signaling = new WebSocket(signalingUrl);
+
+            signaling.onmessage = async (message) => {
+                const data = JSON.parse(message.data);
+                if (data.type === "offer") {
+                    await pc.setRemoteDescription(new RTCSessionDescription(data));
+                    const answer = await pc.createAnswer();
+                    await pc.setLocalDescription(answer);
+                    signaling.send(JSON.stringify(pc.localDescription));
+                }
+            };
+
+            signaling.onopen = () => {
+                console.log("WebSocket connected");
+            };
+
+            signaling.onclose = () => {
+                console.log("WebSocket disconnected");
+            };
+        }
+
+        start();
+    </script>
+</body>
+</html>
